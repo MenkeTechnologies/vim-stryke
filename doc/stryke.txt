@@ -1,0 +1,111 @@
+*stryke.txt*   Syntax, filetype, linting and LSP support for stryke
+
+                            vim-stryke manual
+
+==============================================================================
+CONTENTS                                                       *vim-stryke*
+
+    1. Introduction ........................... |vim-stryke-intro|
+    2. Installation ........................... |vim-stryke-install|
+    3. Filetype detection ..................... |vim-stryke-ftdetect|
+    4. Syntax highlighting .................... |vim-stryke-syntax|
+    5. Linting (ALE) .......................... |vim-stryke-ale|
+    6. Language server (LSP) .................. |vim-stryke-lsp|
+    7. Options ................................ |vim-stryke-options|
+
+==============================================================================
+1. INTRODUCTION                                          *vim-stryke-intro*
+
+vim-stryke adds Vim / Neovim support for stryke, a highly parallel Perl 5
+interpreter written in Rust (a Perl 5 superset). It provides:
+
+    - filetype detection for *.stk files and stryke shebangs
+    - syntax highlighting (Perl base + stryke extension keywords)
+    - indentation (Perl engine)
+    - ALE linting via `stryke --lint`
+    - vim-lsp / coc.nvim registration via `stryke --lsp`
+
+==============================================================================
+2. INSTALLATION                                        *vim-stryke-install*
+
+pathogen (https://github.com/tpope/vim-pathogen): >
+    cd ~/.vim/bundle
+    git clone https://github.com/MenkeTechnologies/vim-stryke
+<
+Then generate help tags: >
+    :Helptags
+<
+vim-plug: >
+    Plug 'MenkeTechnologies/vim-stryke'
+<
+Native packages (Vim 8+ / Neovim): >
+    git clone https://github.com/MenkeTechnologies/vim-stryke \
+        ~/.vim/pack/plugins/start/vim-stryke
+<
+The `stryke` binary must be on $PATH for linting and LSP to work
+(https://github.com/MenkeTechnologies/strykelang).
+
+==============================================================================
+3. FILETYPE DETECTION                                 *vim-stryke-ftdetect*
+
+Buffers are set to the "stryke" filetype when:
+
+    - the filename ends in *.stk, or
+    - line 1 is a shebang naming stryke, e.g. `#!/usr/bin/env stryke`.
+
+==============================================================================
+4. SYNTAX HIGHLIGHTING                                  *vim-stryke-syntax*
+
+The full Perl syntax is loaded as the base, then stryke extension keywords
+are layered on top:
+
+    declaration   fn typed const let module impl trait struct enum
+    control flow  match when then loop yield try catch finally defer
+    concurrency   async await spawn chan
+    types         Int Str Float Bool Num Any Array Hash List Map
+    builtins      p say
+
+These link to the standard "Keyword", "Type" and "Function" highlight groups,
+so every colorscheme covers them.
+
+==============================================================================
+5. LINTING (ALE)                                          *vim-stryke-ale*
+
+When ALE (https://github.com/dense-analysis/ale) is installed, vim-stryke
+registers a linter that runs: >
+    stryke --lint %t
+<
+Diagnostics of the form "<message> at <file> line <n>" are surfaced inline.
+
+==============================================================================
+6. LANGUAGE SERVER (LSP)                                  *vim-stryke-lsp*
+
+vim-lsp (https://github.com/prabirshrestha/vim-lsp): registered automatically
+as: >
+    stryke --lsp
+<
+allowlisted for the "stryke" and "perl" filetypes.
+
+coc.nvim: add to coc-settings.json: >
+    {
+      "languageserver": {
+        "stryke": {
+          "command": "stryke",
+          "args": ["--lsp"],
+          "filetypes": ["stryke", "perl"]
+        }
+      }
+    }
+<
+==============================================================================
+7. OPTIONS                                            *vim-stryke-options*
+
+                                                    *g:vim_stryke_no_ale*
+Set to 1 before load to skip ALE linter registration: >
+    let g:vim_stryke_no_ale = 1
+<
+                                                    *g:vim_stryke_no_lsp*
+Set to 1 before load to skip vim-lsp server registration: >
+    let g:vim_stryke_no_lsp = 1
+<
+ vim:tw=78:ts=8:ft=help:norl:
