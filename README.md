@@ -8,29 +8,35 @@
 ```
 
 [![CI](https://github.com/MenkeTechnologies/vim-stryke/actions/workflows/ci.yml/badge.svg)](https://github.com/MenkeTechnologies/vim-stryke/actions/workflows/ci.yml)
-[![Docs](https://img.shields.io/badge/docs-GitHub%20Pages-blue.svg)](https://menketechnologies.github.io/vim-stryke/)
-[![Report](https://img.shields.io/badge/report-engineering-cyan.svg)](https://menketechnologies.github.io/vim-stryke/report.html)
+[![Docs](https://img.shields.io/badge/docs-online-blue.svg)](https://menketechnologies.github.io/vim-stryke/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-### `[VIM PLUGIN // NEON SYNTAX // PERL-BASE GRAMMAR // STRYKE EXTENSIONS // ALE + LSP]`
-
- ┌──────────────────────────────────────────────────────────────┐
- │ STATUS: ONLINE &nbsp;&nbsp; FILETYPE: STRYKE &nbsp;&nbsp; SIGNAL: ████████░░ │
- └──────────────────────────────────────────────────────────────┘
+### `[VIM PLUGIN // NEON SYNTAX // STANDALONE STRYKE GRAMMAR // ALE + LSP]`
 
 > *"Load it with pathogen. Open a `.stk`. It lights up."*
+
+Vim / Neovim support for **[stryke](https://github.com/MenkeTechnologies/strykelang)** — a highly parallel Perl 5 superset interpreter written in Rust. Standalone syntax highlighting, filetype detection, brace-aware indentation, ALE linting, and vim-lsp / coc.nvim integration. Zero configuration.
+
+```bash
+cd ~/.vim/bundle && git clone https://github.com/MenkeTechnologies/vim-stryke   # pathogen
+```
+
+### [`Read the Docs`](https://menketechnologies.github.io/vim-stryke/) &middot; [`Engineering Report`](https://menketechnologies.github.io/vim-stryke/report.html) · [`strykelang`](https://github.com/MenkeTechnologies/strykelang) · [`zshrs`](https://github.com/MenkeTechnologies/zshrs)
 
 ---
 
 ## [0x00] OVERVIEW
 
-**vim-stryke** is Vim / Neovim support for **[stryke](https://github.com/MenkeTechnologies/strykelang)** — a highly parallel Perl 5 interpreter written in Rust (a Perl 5 superset). It ships as a standard Vim runtime tree, so **pathogen / vim-plug / native packages** add it to `runtimepath` with zero special handling and zero configuration.
+**vim-stryke** is Vim / Neovim support for **stryke** — a highly parallel Perl 5 superset interpreter written in Rust. It ships as a standard Vim runtime tree, so **pathogen / vim-plug / native packages** add it to `runtimepath` with zero special handling and zero configuration.
 
-The design principle is faithfulness over reinvention: stryke's grammar is a **Perl 5 superset**, so the plugin loads Vim's full Perl **syntax** and **indent** engines as the base and layers only the stryke-specific extensions on top. Every extension keyword highlighted was **verified present in real `*.stk` source** — not invented from the language's design lineage. (The threading arrows from stryke's lineage — `->>`, `~>`, `|>` — were deliberately left out because they do not appear in actual stryke code.)
+The syntax file is a **standalone stryke grammar** — not a reskin of Vim's `perl` syntax. Its token categories, keyword sets, builtin lists, and word operators are derived directly from stryke's own canonical sources:
 
-📖 **[Documentation](https://menketechnologies.github.io/vim-stryke/)** &middot; 🛠 **[Engineering report](https://menketechnologies.github.io/vim-stryke/report.html)**
+- `strykelang/strykelang/token.rs` — the lexer and its `KEYWORDS` table
+- `strykelang/editors/intellij/.../StrykeLexer.kt` — the `DECL` / `FN` / `CONTROL` / `PHASE` / `WORD_OPERATOR` / `BOOLEAN` / `PARALLEL_BUILTINS` / `BUILTINS` category sets
 
-Created by **[MenkeTechnologies](https://github.com/MenkeTechnologies)**.
+The highlight categories mirror the official IntelliJ plugin's color slots, so both editors agree on what each token is.
+
+> The `stryke` binary must be on `$PATH` for linting and LSP. `brew install stryke`, or build **[strykelang](https://github.com/MenkeTechnologies/strykelang)**.
 
 ---
 
@@ -40,16 +46,14 @@ Created by **[MenkeTechnologies](https://github.com/MenkeTechnologies)**.
 |---|---|
 | Filetype detection — `*.stk` | **Implemented** — every `*.stk` buffer becomes `filetype=stryke` |
 | Filetype detection — shebang | **Implemented** — extensionless scripts with `#!/usr/bin/env stryke` are detected |
-| Syntax highlighting | **Implemented** — full Perl syntax base + stryke extension keywords / types / builtins |
-| Indentation | **Implemented** — reuses Vim's Perl indent engine (`autoindent` fallback) |
-| Comments | **Implemented** — `commentstring=# %s`, comment-continuation `formatoptions` |
+| Syntax highlighting | **Implemented** — standalone grammar from stryke's lexer (keywords, builtins, parallel builtins, sigils, strings, here-docs, regex, thread macros) |
+| Indentation | **Implemented** — standalone brace-aware indenter |
+| Comments | **Implemented** — `commentstring=# %s`, POD blocks, comment-continuation `formatoptions` |
 | Linting | **Implemented** — ALE linter running `stryke --lint` |
 | Language server (vim-lsp) | **Implemented** — `stryke --lsp`, allowlisted for `stryke` + `perl` |
 | Language server (coc.nvim) | **Implemented** — ready-to-paste `languageserver` config |
 | Help | **Implemented** — `:help vim-stryke` |
 | Config required | **None** — two opt-outs to disable ALE or LSP wiring |
-
-> The `stryke` binary must be on `$PATH` for linting and LSP. `brew install stryke`, or build **[strykelang](https://github.com/MenkeTechnologies/strykelang)**.
 
 ---
 
@@ -80,19 +84,24 @@ Open any `.stk` file and it lights up — no further configuration. See `:help v
 
 ---
 
-## [0x03] SYNTAX // EXTENSION KEYWORDS
+## [0x03] SYNTAX // TOKEN CATEGORIES
 
-On top of the Perl base grammar, vim-stryke highlights the keywords stryke adds. **Every keyword below was verified present in real `*.stk` source.**
+The grammar classifies tokens into the same categories the official stryke lexer uses:
 
-| Group | Keywords | Highlight |
+| Category | Tokens (sample) | Highlight |
 |---|---|---|
-| Declaration / structure | `fn` `typed` `const` `let` `module` `impl` `trait` `struct` `enum` | `Keyword` |
-| Control flow | `match` `when` `then` `loop` `yield` `try` `catch` `finally` `defer` | `Keyword` |
-| Concurrency | `async` `await` `spawn` `chan` | `Keyword` |
-| Type names | `Int` `Str` `Float` `Bool` `Num` `Any` `Array` `Hash` `List` `Map` | `Type` |
-| Print builtins | `p` `say` | `Function` |
+| Declarations | `my` `var` `val` `our` `local` `state` `const` `typed` `use` `package` `pub` `is` `as` | `StorageClass` |
+| Function / type introducers | `fn` `sub` `method` `class` `trait` `struct` `enum` `impl` `extends` | `Keyword` |
+| Control flow | `if` `elsif` `else` `unless` `while` `until` `loop` `for` `foreach` `match` `when` `try` `catch` `finally` `defer` | `Statement` |
+| Phase / block hooks | `BEGIN` `END` `INIT` `CHECK` `UNITCHECK` `BUILD` `DESTROY` | `PreProc` |
+| Word operators | `and` `or` `not` `xor` `cmp` `eq` `ne` `lt` `le` `gt` `ge` `x` | `Operator` |
+| Booleans / undef | `true` `false` `undef` `null` | `Boolean` / `Constant` |
+| Parallel builtins | `pmap` `pgrep` `pfor` `ploop` `pwhile` `spawn` `async` `await` `channel` | `Function` |
+| Builtins | `p` `say` `print` `map` `grep` `reduce` `fold` `json_encode` `sha256` `fetch` `ai` … | `Function` |
+| Type names | `Int` `Str` `Float` `Bool` `Num` `Any` `Array` `Hash` `List` `Map` `Set` `Void` | `Type` |
+| Thread macros | `~>` `~>>` `->>` `\|>` (plus streaming `~s>`, parallel `~p>`, distributed `~d>` variants) | `Operator` |
 
-These link to the standard `Keyword`, `Type`, and `Function` highlight groups, so every colorscheme covers them without bespoke tuning.
+Sigil variables (`$scalar` / `@array` / `%hash`, the `$_` topic, special punctuation vars), single / double / backtick strings with interpolation and escapes, `qw//` and `q//` / `qq//` quotes, here-docs, and `m//` / `s///` / `tr///` / `qr//` regex are all handled. Everything links to standard highlight groups, so every colorscheme covers it.
 
 ---
 
@@ -148,9 +157,9 @@ Set before the plugin loads (e.g. in your `vimrc`):
 ```
 vim-stryke/
 ├── ftdetect/stryke.vim   # *.stk + #!/usr/bin/env stryke -> filetype=stryke
-├── syntax/stryke.vim     # runtime! syntax/perl.vim + stryke extension keywords
+├── syntax/stryke.vim     # standalone stryke grammar (from token.rs + StrykeLexer.kt)
 ├── ftplugin/stryke.vim   # commentstring '# %s', comments, formatoptions
-├── indent/stryke.vim     # runtime! indent/perl.vim
+├── indent/stryke.vim     # standalone brace-aware indenter
 ├── plugin/stryke.vim     # ALE linter + vim-lsp + coc wiring
 └── doc/stryke.txt        # :help vim-stryke
 ```

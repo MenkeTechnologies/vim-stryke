@@ -20,8 +20,8 @@ vim-stryke adds Vim / Neovim support for stryke, a highly parallel Perl 5
 interpreter written in Rust (a Perl 5 superset). It provides:
 
     - filetype detection for *.stk files and stryke shebangs
-    - syntax highlighting (Perl base + stryke extension keywords)
-    - indentation (Perl engine)
+    - syntax highlighting (standalone grammar from stryke's own lexer)
+    - brace-aware indentation
     - ALE linting via `stryke --lint`
     - vim-lsp / coc.nvim registration via `stryke --lsp`
 
@@ -56,17 +56,24 @@ Buffers are set to the "stryke" filetype when:
 ==============================================================================
 4. SYNTAX HIGHLIGHTING                                  *vim-stryke-syntax*
 
-The full Perl syntax is loaded as the base, then stryke extension keywords
-are layered on top:
+A standalone stryke grammar — NOT a reskin of Vim's perl syntax. Token
+categories are taken from stryke's own lexer (token.rs) and the official
+IntelliJ plugin's category sets (StrykeLexer.kt):
 
-    declaration   fn typed const let module impl trait struct enum
-    control flow  match when then loop yield try catch finally defer
-    concurrency   async await spawn chan
-    types         Int Str Float Bool Num Any Array Hash List Map
-    builtins      p say
+    declarations  my var val our local state const typed use package pub is as
+    fn/type intro fn sub method class trait struct enum impl extends
+    control flow  if elsif else unless while until loop for match when try
+                  catch finally defer
+    phase hooks   BEGIN END INIT CHECK UNITCHECK BUILD DESTROY
+    word ops      and or not xor cmp eq ne lt le gt ge x
+    parallel      pmap pgrep pfor ploop pwhile spawn async await channel (20)
+    builtins      p say print map grep reduce json_encode sha256 fetch ai (144)
+    types         Int Str Float Bool Num Any Array Hash List Map Set Void
+    thread macros ~> ~>> ->> |> (plus ~s> ~p> ~d> variants)
 
-These link to the standard "Keyword", "Type" and "Function" highlight groups,
-so every colorscheme covers them.
+Sigil variables, the $_ topic, strings / here-docs / interpolation, and
+m// s/// tr/// qr// regex are handled too. Everything links to standard
+highlight groups, so every colorscheme covers it.
 
 ==============================================================================
 5. LINTING (ALE)                                          *vim-stryke-ale*

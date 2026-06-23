@@ -1,18 +1,48 @@
 " vim-stryke — indentation for stryke buffers
 "
-" stryke's block grammar is Perl's ({ } blocks, here-docs, continuation), so
-" reuse Vim's perl indent engine rather than reinventing it.
+" A standalone brace-aware indenter for stryke's block grammar. Increases
+" indent after a line that opens a block / paren / bracket, and dedents a line
+" that begins with a closing delimiter.
 
 if exists('b:did_indent')
   finish
 endif
+let b:did_indent = 1
 
-runtime! indent/perl.vim
+setlocal autoindent
+setlocal nolisp
+setlocal nosmartindent
+setlocal indentexpr=GetStrykeIndent()
+setlocal indentkeys=0{,0},0),0],!^F,o,O,e
 
-" runtime! perl indent already set b:did_indent and b:undo_indent; nothing more
-" to add. If the perl indent script is unavailable, fall back to autoindent.
-if !exists('b:did_indent')
-  setlocal autoindent
-  let b:did_indent = 1
-  let b:undo_indent = 'setlocal autoindent<'
+let b:undo_indent = 'setlocal autoindent< lisp< smartindent< indentexpr< indentkeys<'
+
+" Only define the function once.
+if exists('*GetStrykeIndent')
+  finish
 endif
+
+function! GetStrykeIndent() abort
+  let l:prevlnum = prevnonblank(v:lnum - 1)
+  if l:prevlnum == 0
+    return 0
+  endif
+
+  let l:prevline = getline(l:prevlnum)
+  let l:curline = getline(v:lnum)
+  let l:ind = indent(l:prevlnum)
+  let l:sw = shiftwidth()
+
+  " Indent one level deeper after a line that ends by opening a block,
+  " paren, or bracket (ignoring a trailing comment).
+  if l:prevline =~# '[{[(]\s*\%(#.*\)\?$'
+    let l:ind += l:sw
+  endif
+
+  " Dedent a line that starts with a closing delimiter.
+  if l:curline =~# '^\s*[)}\]]'
+    let l:ind -= l:sw
+  endif
+
+  return l:ind < 0 ? 0 : l:ind
+endfunction
