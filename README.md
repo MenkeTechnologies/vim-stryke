@@ -29,12 +29,13 @@ cd ~/.vim/bundle && git clone https://github.com/MenkeTechnologies/vim-stryke   
 
 **vim-stryke** is Vim / Neovim support for **stryke** — a highly parallel Perl 5 superset interpreter written in Rust. It ships as a standard Vim runtime tree, so **pathogen / vim-plug / native packages** add it to `runtimepath` with zero special handling and zero configuration.
 
-The syntax file is a **standalone stryke grammar** — not a reskin of Vim's `perl` syntax. Its token categories, keyword sets, builtin lists, and word operators are derived directly from stryke's own canonical sources:
+The syntax file is a **standalone stryke grammar** — not a reskin of Vim's `perl` syntax. It is **generated** (`scripts/gen_syntax.sh`) directly from the stryke binary's own reflection tables, so it carries the **complete** language surface and never drifts:
 
-- `strykelang/strykelang/token.rs` — the lexer and its `KEYWORDS` table
-- `strykelang/editors/intellij/.../StrykeLexer.kt` — the `DECL` / `FN` / `CONTROL` / `PHASE` / `WORD_OPERATOR` / `BOOLEAN` / `PARALLEL_BUILTINS` / `BUILTINS` category sets
+- **all 10,450 builtins** — `stryke -E 'p join "\n", sort keys %b'`
+- the 90 keywords — `stryke -E 'p join "\n", sort keys %k'`
+- the 39 parallel primitives — `stryke -E 'p join "\n", sort @{$c{parallel}}'`
 
-The highlight categories mirror the official IntelliJ plugin's color slots, so both editors agree on what each token is.
+Regenerate after a stryke upgrade with `./scripts/gen_syntax.sh`.
 
 > The `stryke` binary must be on `$PATH` for linting and LSP. `brew install stryke`, or build **[strykelang](https://github.com/MenkeTechnologies/strykelang)**.
 
@@ -96,8 +97,8 @@ The grammar classifies tokens into the same categories the official stryke lexer
 | Phase / block hooks | `BEGIN` `END` `INIT` `CHECK` `UNITCHECK` `BUILD` `DESTROY` | `PreProc` |
 | Word operators | `and` `or` `not` `xor` `cmp` `eq` `ne` `lt` `le` `gt` `ge` `x` | `Operator` |
 | Booleans / undef | `true` `false` `undef` `null` | `Boolean` / `Constant` |
-| Parallel builtins | `pmap` `pgrep` `pfor` `ploop` `pwhile` `spawn` `async` `await` `channel` | `Function` |
-| Builtins | `p` `say` `print` `map` `grep` `reduce` `fold` `json_encode` `sha256` `fetch` `ai` … | `Function` |
+| Parallel builtins (39) | `pmap` `pgrep` `pfor` `ploop` `pwhile` `pchannel` `preduce` `fan` `par_walk` … | `Function` |
+| Builtins (10,450) | `p` `say` `print` `map` `grep` `reduce` `json_encode` `sha256` `fetch` `ai` `a_law_decode` … | `Function` |
 | Type names | `Int` `Str` `Float` `Bool` `Num` `Any` `Array` `Hash` `List` `Map` `Set` `Void` | `Type` |
 | Thread macros | `~>` `~>>` `->>` `\|>` (plus streaming `~s>`, parallel `~p>`, distributed `~d>` variants) | `Operator` |
 
@@ -157,7 +158,8 @@ Set before the plugin loads (e.g. in your `vimrc`):
 ```
 vim-stryke/
 ├── ftdetect/stryke.vim   # *.stk + #!/usr/bin/env stryke -> filetype=stryke
-├── syntax/stryke.vim     # standalone stryke grammar (from token.rs + StrykeLexer.kt)
+├── syntax/stryke.vim     # standalone stryke grammar (generated; all 10,450 builtins)
+├── scripts/gen_syntax.sh # regenerates syntax/stryke.vim from the stryke binary
 ├── ftplugin/stryke.vim   # commentstring '# %s', comments, formatoptions
 ├── indent/stryke.vim     # standalone brace-aware indenter
 ├── plugin/stryke.vim     # ALE linter + vim-lsp + coc wiring
