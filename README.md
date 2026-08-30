@@ -31,7 +31,7 @@ cd ~/.vim/bundle && git clone https://github.com/MenkeTechnologies/vim-stryke   
 
 The syntax file is a **standalone stryke grammar** — not a reskin of Vim's `perl` syntax. It is **generated** (`scripts/gen_syntax.sh`) directly from the stryke binary's own reflection tables, so it carries the **complete** language surface and never drifts:
 
-- **all 10,407 builtins** — `stryke -E 'p join "\n", sort keys %b'`
+- **all 10,451 builtins** — `stryke -E 'p join "\n", sort keys %b'`
 - the 90 keywords — `stryke -E 'p join "\n", sort keys %k'`
 - the 39 parallel primitives — `stryke -E 'p join "\n", sort @{$c{parallel}}'`
 
@@ -98,7 +98,7 @@ The grammar classifies tokens into the same categories the official stryke lexer
 | Word operators | `and` `or` `not` `xor` `cmp` `eq` `ne` `lt` `le` `gt` `ge` `x` | `Operator` |
 | Booleans / undef | `true` `false` `undef` `null` | `Boolean` / `Constant` |
 | Parallel builtins (39) | `pmap` `pgrep` `pfor` `ploop` `pwhile` `pchannel` `preduce` `fan` `par_walk` … | `Function` |
-| Builtins (10,407) | `p` `say` `print` `map` `grep` `reduce` `json_encode` `sha256` `fetch` `ai` `a_law_decode` … | `Function` |
+| Builtins (10,451) | `p` `say` `print` `map` `grep` `reduce` `json_encode` `sha256` `fetch` `ai` `a_law_decode` … | `Function` |
 | Type names | `Int` `Str` `Float` `Bool` `Num` `Any` `Array` `Hash` `List` `Map` `Set` `Void` | `Type` |
 | Thread macros | `~>` `~>>` `->>` `\|>` (plus streaming `~s>`, parallel `~p>`, distributed `~d>` variants) | `Operator` |
 
@@ -158,7 +158,7 @@ Set before the plugin loads (e.g. in your `vimrc`):
 ```
 vim-stryke/
 ├── ftdetect/stryke.vim   # *.stk + #!/usr/bin/env stryke -> filetype=stryke
-├── syntax/stryke.vim     # standalone stryke grammar (generated; all 10,407 builtins)
+├── syntax/stryke.vim     # standalone stryke grammar (generated; all 10,451 builtins)
 ├── scripts/gen_syntax.sh # regenerates syntax/stryke.vim from the stryke binary
 ├── ftplugin/stryke.vim   # commentstring '# %s', comments, formatoptions
 ├── indent/stryke.vim     # standalone brace-aware indenter
