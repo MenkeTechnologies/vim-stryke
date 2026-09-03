@@ -37,7 +37,7 @@ The syntax file is a **standalone stryke grammar** — not a reskin of Vim's `pe
 
 Regenerate after a stryke upgrade with `./scripts/gen_syntax.sh`.
 
-> The `stryke` binary must be on `$PATH` for linting and LSP. `brew install stryke`, or build **[strykelang](https://github.com/MenkeTechnologies/strykelang)**.
+> The `stryke` binary must be on `$PATH` for linting and LSP. `brew install menketechnologies/menketech/stryke`, or build **[strykelang](https://github.com/MenkeTechnologies/strykelang)**.
 
 ---
 
