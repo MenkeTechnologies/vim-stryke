@@ -68,7 +68,7 @@ tables, so it carries the complete language surface and never drifts:
     word ops      and or not xor cmp eq ne lt le gt ge x
     parallel      pmap pgrep pfor ploop pwhile pchannel preduce fan (39)
     builtins      p say print map grep reduce json_encode sha256 fetch ai
-                  a_law_decode absorbance ... (all 10,407)
+                  a_law_decode absorbance ... (all 10,451)
     types         Int Str Float Bool Num Any Array Hash List Map Set Void
     thread macros ~> ~>> ->> |> (plus ~s> ~p> ~d> variants)
 
