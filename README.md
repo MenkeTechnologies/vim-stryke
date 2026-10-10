@@ -31,9 +31,9 @@ cd ~/.vim/bundle && git clone https://github.com/MenkeTechnologies/vim-stryke   
 
 The syntax file is a **standalone stryke grammar** — not a reskin of Vim's `perl` syntax. It is **generated** (`scripts/gen_syntax.sh`) directly from the stryke binary's own reflection tables, so it carries the **complete** language surface and never drifts:
 
-- **all 10,451 builtins** — `stryke -E 'p join "\n", sort keys %b'`
-- the 90 keywords — `stryke -E 'p join "\n", sort keys %k'`
-- the 39 parallel primitives — `stryke -E 'p join "\n", sort @{$c{parallel}}'`
+- **all builtins** — `stryke -E 'p join "\n", sort keys %b'`
+- the keywords — `stryke -E 'p join "\n", sort keys %k'`
+- the parallel primitives — `stryke -E 'p join "\n", sort @{$c{parallel}}'`
 
 Regenerate after a stryke upgrade with `./scripts/gen_syntax.sh`.
 
@@ -91,14 +91,14 @@ The grammar classifies tokens into the same categories the official stryke lexer
 
 | Category | Tokens (sample) | Highlight |
 |---|---|---|
-| Declarations | `my` `var` `val` `our` `local` `state` `const` `typed` `use` `package` `pub` `is` `as` | `StorageClass` |
-| Function / type introducers | `fn` `sub` `method` `class` `trait` `struct` `enum` `impl` `extends` | `Keyword` |
+| Declarations | `my` `var` `val` `our` `local` `state` `const` `typed` `use` `package` `pub` `priv` | `StorageClass` |
+| Function / type introducers | `fn` `sub` `class` `trait` `struct` `enum` `impl` `extends` | `Keyword` |
 | Control flow | `if` `elsif` `else` `unless` `while` `until` `loop` `for` `foreach` `match` `when` `try` `catch` `finally` `defer` | `Statement` |
-| Phase / block hooks | `BEGIN` `END` `INIT` `CHECK` `UNITCHECK` `BUILD` `DESTROY` | `PreProc` |
+| Phase / block hooks | `BEGIN` `END` `INIT` `CHECK` `UNITCHECK` | `PreProc` |
 | Word operators | `and` `or` `not` `xor` `cmp` `eq` `ne` `lt` `le` `gt` `ge` `x` | `Operator` |
 | Booleans / undef | `true` `false` `undef` `null` | `Boolean` / `Constant` |
-| Parallel builtins (39) | `pmap` `pgrep` `pfor` `ploop` `pwhile` `pchannel` `preduce` `fan` `par_walk` … | `Function` |
-| Builtins (10,451) | `p` `say` `print` `map` `grep` `reduce` `json_encode` `sha256` `fetch` `ai` `a_law_decode` … | `Function` |
+| Parallel builtins | `pmap` `pgrep` `pfor` `ploop` `pwhile` `pchannel` `preduce` `fan` `par_walk` … | `Function` |
+| Builtins | `p` `say` `print` `map` `grep` `reduce` `json_encode` `sha256` `fetch` `ai` `a_law_decode` … | `Function` |
 | Type names | `Int` `Str` `Float` `Bool` `Num` `Any` `Array` `Hash` `List` `Map` `Set` `Void` | `Type` |
 | Thread macros | `~>` `~>>` `->>` `\|>` (plus streaming `~s>`, parallel `~p>`, distributed `~d>` variants) | `Operator` |
 
@@ -158,7 +158,7 @@ Set before the plugin loads (e.g. in your `vimrc`):
 ```
 vim-stryke/
 ├── ftdetect/stryke.vim   # *.stk + #!/usr/bin/env stryke -> filetype=stryke
-├── syntax/stryke.vim     # standalone stryke grammar (generated; all 10,451 builtins)
+├── syntax/stryke.vim     # standalone stryke grammar (generated from the stryke binary)
 ├── scripts/gen_syntax.sh # regenerates syntax/stryke.vim from the stryke binary
 ├── ftplugin/stryke.vim   # commentstring '# %s', comments, formatoptions
 ├── indent/stryke.vim     # standalone brace-aware indenter
